@@ -1,9 +1,9 @@
 {
-  "name": "@vue/web-component-wrapper",
+  "name": "@telia/vue-web-component-wrapper-ie11",
   "version": "1.2.0",
-  "description": "wrap a vue component as a web component.",
-  "main": "dist/vue-wc-wrapper.js",
-  "unpkg": "dist/vue-wc-wrapper.global.js",
+  "description": "wrap a vue component as a web component, for IE 11 too.",
+  "main": "dist/vue-wc-wrapper.es5.js",
+  "unpkg": "dist/vue-wc-wrapper.es5.global.js",
   "files": [
     "dist"
   ],
@@ -16,18 +16,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/web-component-wrapper.git"
+    "url": "git+https://github.com/TeliaSweden/vue-web-component-wrapper-ie11.git"
   },
   "keywords": [
     "vue",
     "web-component"
   ],
-  "author": "Evan You",
+  "author": "William Bernting",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vuejs/web-component-wrapper/issues"
+    "url": "https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/issues"
   },
-  "homepage": "https://github.com/vuejs/web-component-wrapper#readme",
+  "homepage": "https://github.com/TeliaSweden/vue-web-component-wrapper-ie11#readme",
   "devDependencies": {
     "eslint": "^4.16.0",
     "eslint-plugin-vue-libs": "^2.1.0",
@@ -36,6 +36,10 @@
     "lint-staged": "^6.1.0",
     "puppeteer": "^1.0.0",
     "rollup": "^0.55.3",
+    "babel-plugin-transform-builtin-classes": "^0.6.1",
+    "@babel/preset-env": "7.9.5",
+    "@babel/core": "7.9.0",
+    "rollup-plugin-babel": "^4.4.0",
     "typescript": "^3.2.2",
     "vue": "^2.5.13",
     "yorkie": "^1.0.3"
@@ -44,7 +48,10 @@
     "env": {
       "browser": true
     },
-    "extends": "plugin:vue-libs/recommended"
+    "extends": "plugin:vue-libs/recommended",
+    "rules": {
+      "space-before-function-paren": "off"
+    }
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
