@@ -1,0 +1,9 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/bower_components": true,
+    "**/*.code-search": true
+  },
+  "eslint.workingDirectories": [{ "mode": "auto" }]
+}
