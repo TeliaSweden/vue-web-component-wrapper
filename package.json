@@ -11,7 +11,7 @@
     "test": "jest",
     "lint": "eslint src",
     "build": "rollup -c",
-    "prepare": "rollup -c",
+    "prepublishOnly": "rollup -c",
     "test:types": "tsc -p ./types/tsconfig.json"
   },
   "repository": {
