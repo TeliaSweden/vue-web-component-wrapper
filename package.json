@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "description": "wrap a vue component as a web component, for IE 11 too.",
   "main": "dist/vue-wc-wrapper.es5.js",
+  "module": "dist/vue-wc-wrapper.js",
   "unpkg": "dist/vue-wc-wrapper.es5.global.js",
   "files": [
     "dist"
