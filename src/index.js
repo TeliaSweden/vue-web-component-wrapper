@@ -260,8 +260,14 @@ export default function wrap(Vue, Component) {
         }
         // initialize children
         this.updateSlotChildren()
-        wrapper.$mount()
-        this.shadowRoot.appendChild(wrapper.$el)
+
+        // doing this will let us access the shadow root via `this.$root.$el.getRootNode()`
+        // inside of the mounted hook, which is important for copying global styles to the shadow dom.
+        const tempContainer = document.createElement('div')
+        this.shadowRoot.appendChild(tempContainer)
+
+        // tempContainer will be completely rewritten
+        wrapper.$mount(tempContainer)
       } else {
         callHooks(this.vueComponent, 'activated')
       }

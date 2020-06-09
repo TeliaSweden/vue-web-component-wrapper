@@ -563,7 +563,7 @@ function wrap(Vue, Component) {
         var _connectedCallback = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
           var _this5 = this;
 
-          var wrapper, syncInitialAttributes;
+          var wrapper, syncInitialAttributes, tempContainer;
           return regeneratorRuntime.wrap(function _callee$(_context) {
             while (1) {
               switch (_context.prev = _context.next) {
@@ -601,9 +601,13 @@ function wrap(Vue, Component) {
                     } // initialize children
 
 
-                    this.updateSlotChildren();
-                    wrapper.$mount();
-                    this.shadowRoot.appendChild(wrapper.$el);
+                    this.updateSlotChildren(); // doing this will let us access the shadow root via `this.$root.$el.getRootNode()`
+                    // inside of the mounted hook, which is important for copying global styles to the shadow dom.
+
+                    tempContainer = document.createElement('div');
+                    this.shadowRoot.appendChild(tempContainer); // tempContainer will be completely rewritten
+
+                    wrapper.$mount(tempContainer);
                   } else {
                     callHooks(this.vueComponent, 'activated');
                   }
