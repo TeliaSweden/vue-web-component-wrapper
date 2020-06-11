@@ -21,17 +21,23 @@ export function cloneElementsToShadowRoot(shadowRoot, elements) {
 }
 
 export function getAllStyles(target, selector, filter) {
-  return filter
-    ? Array.from(target.querySelectorAll(selector)).filter(filter)
-    : Array.from(target.querySelectorAll(selector))
+  const elements = Array.prototype.slice.call(target.querySelectorAll(selector))
+
+  return filter ? elements.filter(filter) : elements
 }
 
-export function observeStyleChanges(callback, target, selector, filter, observeOptions) {
+export function observeStyleChanges(
+  callback,
+  target,
+  selector,
+  filter,
+  observeOptions
+) {
   return new MutationObserver((mutations, observer) => {
     mutations.forEach((mutation) => {
-      const matchedElements = mutation.addedNodes.filter(
-        (node) => node.matches && node.matches(selector)
-      )
+      const matchedElements = Array.prototype.slice
+        .call(mutation.addedNodes)
+        .filter((node) => node.matches && node.matches(selector))
 
       if (matchedElements.length > 0) {
         callback(filter ? matchedElements.filter(filter) : matchedElements)

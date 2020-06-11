@@ -29,7 +29,7 @@ function getAllStyles(target, selector, filter) {
 function observeStyleChanges(callback, target, selector, filter, observeOptions) {
   return new MutationObserver((mutations, observer) => {
     mutations.forEach((mutation) => {
-      const matchedElements = mutation.addedNodes.filter(
+      const matchedElements = Array.from(mutation.addedNodes).filter(
         (node) => node.matches && node.matches(selector)
       );
 
