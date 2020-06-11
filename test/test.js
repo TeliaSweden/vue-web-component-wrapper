@@ -1,5 +1,4 @@
-/* globals test expect el, els */
-
+/* globals el els */
 const launchPage = require('./setup')
 
 test('properties', async () => {

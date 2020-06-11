@@ -1,25 +1,16 @@
-/* globals beforeAll afterAll */
 require('@babel/polyfill')
 const puppeteer = require('puppeteer')
 const { createServer } = require('http-server')
 
+// dumpio: true is helpful to get error logs from the browser
 const port = 3000
 const puppeteerOptions = process.env.CI
   ? { args: ['--no-sandbox', '--disable-setuid-sandbox'] }
-  : {}
+  : { dumpio: false }
 
 let browser, server
 
 module.exports = async function launchPage(name) {
-  // const browser = await puppeteer.launch();
-  // const page = await browser.newPage();
-  // await page.goto(url);
-  // await page.screenshot({path: 'example.png'});
-
-  // await browser.close();
-
-  const browser = await puppeteer.launch()
-
   const url = `http://localhost:${port}/test/fixtures/${name}.html`
   const page = await browser.newPage()
   await page.goto(url)

@@ -38,6 +38,7 @@
     "@babel/preset-env": "^7.10.2",
     "eslint": "^7.2.0",
     "eslint-plugin-vue-libs": "^4.0.0",
+    "eslint-plugin-jest": "^23.13.2",
     "http-server": "^0.12.3",
     "jest": "^26.0.1",
     "lint-staged": "^10.2.9",
@@ -50,10 +51,14 @@
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
+    "plugins": [
+      "jest"
+    ],
     "env": {
-      "browser": true
+      "browser": true,
+      "jest/globals": true
     },
-    "extends": "plugin:vue-libs/recommended",
+    "extends": ["plugin:vue-libs/recommended", "plugin:jest/recommended"],
     "rules": {
       "space-before-function-paren": "off"
     }
