@@ -256,6 +256,8 @@ function wrap(Vue, Component, wrapOptions = {}) {
           Component().then((resolved) => {
             if (
               resolved.__esModule ||
+              // assume userland has polyfilled this
+              // eslint-disable-next-line
               resolved[Symbol.toStringTag] === 'Module'
             ) {
               resolved = resolved.default;
