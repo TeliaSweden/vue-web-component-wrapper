@@ -1,36 +1,36 @@
 const camelizeRE = /-(\w)/g;
-const camelize = str => {
-  return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+const camelize = (str) => {
+  return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''))
 };
 
 const hyphenateRE = /\B([A-Z])/g;
-const hyphenate = str => {
+const hyphenate = (str) => {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 };
 
-function getInitialProps (propsList) {
+function getInitialProps(propsList) {
   const res = {};
-  propsList.forEach(key => {
+  propsList.forEach((key) => {
     res[key] = undefined;
   });
   return res
 }
 
-function injectHook (options, key, hook) {
+function injectHook(options, key, hook) {
   options[key] = [].concat(options[key] || []);
   options[key].unshift(hook);
 }
 
-function callHooks (vm, hook) {
+function callHooks(vm, hook) {
   if (vm) {
     const hooks = vm.$options[hook] || [];
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       hook.call(vm);
     });
   }
 }
 
-function createCustomEvent (name, args) {
+function createCustomEvent(name, args) {
   return new CustomEvent(name, {
     bubbles: false,
     cancelable: false,
@@ -38,10 +38,10 @@ function createCustomEvent (name, args) {
   })
 }
 
-const isBoolean = val => /function Boolean/.test(String(val));
-const isNumber = val => /function Number/.test(String(val));
+const isBoolean = (val) => /function Boolean/.test(String(val));
+const isNumber = (val) => /function Number/.test(String(val));
 
-function convertAttributeValue (value, name, { type } = {}) {
+function convertAttributeValue(value, name, { type } = {}) {
   if (isBoolean(type)) {
     if (value === 'true' || value === 'false') {
       return value === 'true'
@@ -58,7 +58,7 @@ function convertAttributeValue (value, name, { type } = {}) {
   }
 }
 
-function toVNodes (h, children) {
+function toVNodes(h, children) {
   const res = [];
   for (let i = 0, l = children.length; i < l; i++) {
     res.push(toVNode(h, children[i]));
@@ -66,7 +66,7 @@ function toVNodes (h, children) {
   return res
 }
 
-function toVNode (h, node) {
+function toVNode(h, node) {
   if (node.nodeType === 3) {
     return node.data.trim() ? node.data : null
   } else if (node.nodeType === 1) {
@@ -86,7 +86,7 @@ function toVNode (h, node) {
   }
 }
 
-function getAttributes (node) {
+function getAttributes(node) {
   const res = {};
   for (let i = 0, l = node.attributes.length; i < l; i++) {
     const attr = node.attributes[i];
