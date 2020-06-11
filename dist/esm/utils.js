@@ -16,6 +16,30 @@ function getInitialProps(propsList) {
   return res
 }
 
+function cloneElementsToShadowRoot(shadowRoot, elements) {
+  elements.forEach((el) => shadowRoot.appendChild(el.cloneNode(true)));
+}
+
+function getAllStyles(target, selector, filter) {
+  return filter
+    ? Array.from(target.querySelectorAll(selector)).filter(filter)
+    : Array.from(target.querySelectorAll(selector))
+}
+
+function observeStyleChanges(callback, target, selector, filter, observeOptions) {
+  return new MutationObserver((mutations, observer) => {
+    mutations.forEach((mutation) => {
+      const matchedElements = mutation.addedNodes.filter(
+        (node) => node.matches && node.matches(selector)
+      );
+
+      if (matchedElements.length > 0) {
+        callback(filter ? matchedElements.filter(filter) : matchedElements);
+      }
+    });
+  }).observe(target, observeOptions)
+}
+
 function injectHook(options, key, hook) {
   options[key] = [].concat(options[key] || []);
   options[key].unshift(hook);
@@ -95,5 +119,5 @@ function getAttributes(node) {
   return res
 }
 
-export { callHooks, camelize, convertAttributeValue, createCustomEvent, getInitialProps, hyphenate, injectHook, toVNodes };
+export { callHooks, camelize, cloneElementsToShadowRoot, convertAttributeValue, createCustomEvent, getAllStyles, getInitialProps, hyphenate, injectHook, observeStyleChanges, toVNodes };
 //# sourceMappingURL=utils.js.map

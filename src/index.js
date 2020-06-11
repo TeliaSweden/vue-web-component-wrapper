@@ -6,15 +6,32 @@ import {
   injectHook,
   getInitialProps,
   createCustomEvent,
-  convertAttributeValue
+  convertAttributeValue,
+  cloneElementsToShadowRoot,
+  getAllStyles,
+  observeStyleChanges
 } from './utils.js'
 
-export default function wrap(Vue, Component) {
+export default function wrap(Vue, Component, wrapOptions = {}) {
   const isAsync = typeof Component === 'function' && !Component.cid
   let isInitialized = false
   let hyphenatedPropsList
   let camelizedPropsList
   let camelizedPropsMap
+
+  if (wrapOptions.globalStyles) {
+    const defaults = {
+      target: document.head,
+      selector: 'style, link',
+      filter: undefined,
+      observeOptions: { childList: true, subtree: true }
+    }
+
+    wrapOptions.globalStyles = {
+      ...defaults,
+      ...wrapOptions.globalStyles
+    }
+  }
 
   function initialize(Component) {
     if (isInitialized) return
@@ -265,6 +282,27 @@ export default function wrap(Vue, Component) {
         // inside of the mounted hook, which is important for copying global styles to the shadow dom.
         const tempContainer = document.createElement('div')
         this.shadowRoot.appendChild(tempContainer)
+
+        // all initial styles
+        cloneElementsToShadowRoot(
+          this.shadowRoot,
+          getAllStyles(
+            wrapOptions.globalStyles.target,
+            wrapOptions.globalStyles.selector,
+            wrapOptions.globalStyles.filter
+          )
+        )
+
+        // all added styles
+        observeStyleChanges(
+          (elements) => {
+            cloneElementsToShadowRoot(this.shadowRoot, elements)
+          },
+          wrapOptions.globalStyles.target,
+          wrapOptions.globalStyles.selector,
+          wrapOptions.globalStyles.filter,
+          wrapOptions.globalStyles.observeOptions
+        )
 
         // tempContainer will be completely rewritten
         wrapper.$mount(tempContainer)
