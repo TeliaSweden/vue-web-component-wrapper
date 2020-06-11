@@ -72,7 +72,13 @@ const isBoolean = (val) => /function Boolean/.test(String(val));
 const isNumber = (val) => /function Number/.test(String(val));
 
 function convertAttributeValue(value, name, { type } = {}) {
-  if (isBoolean(type)) {
+  if (name.endsWith('-json')) {
+    try {
+      return JSON.parse(value)
+    } catch (e) {
+      return 'INVALID_JSON'
+    }
+  } else if (isBoolean(type)) {
     if (value === 'true' || value === 'false') {
       return value === 'true'
     }

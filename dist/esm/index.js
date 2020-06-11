@@ -29,9 +29,43 @@ function wrap(Vue, Component, wrapOptions = {}) {
       typeof Component === 'function' ? Component.options : Component;
 
     // extract props info
-    const propsList = Array.isArray(options.props)
+    let propsList = Array.isArray(options.props)
       ? options.props
       : Object.keys(options.props || {});
+
+    if (wrapOptions.jsonMapping) {
+      // add the json props
+
+      const shouldBeSerializable = (type) => type === Array || type === Object;
+
+      let jsonProps = {};
+      if (!Array.isArray(options.props || {})) {
+        // create -json serializable props based on existing props
+        jsonProps = Object.keys(options.props || {}).reduce(
+          (coll = {}, propName) => {
+            const sourceProp = (options.props || {})[propName];
+
+            if (sourceProp === undefined) {
+              return coll
+            }
+
+            const type = 'type' in sourceProp ? sourceProp.type : sourceProp;
+
+            if (shouldBeSerializable(type)) {
+              coll[propName + 'Json'] = {
+                type: String
+              };
+            }
+
+            return coll
+          },
+          {}
+        );
+      }
+
+      propsList = propsList.concat(Object.keys(jsonProps));
+    }
+
     hyphenatedPropsList = propsList.map(hyphenate);
     camelizedPropsList = propsList.map(camelize);
     const originalPropsAsObject = Array.isArray(options.props)
@@ -78,13 +112,19 @@ function wrap(Vue, Component, wrapOptions = {}) {
   }
 
   function syncAttribute(el, key) {
-    const camelized = camelize(key);
+    const jsonSuffixed = key.endsWith('-json');
+    const camelized = camelize(key.replace(/-json$/, ''));
+
     const value = el.hasAttribute(key) ? el.getAttribute(key) : undefined;
-    el._wrapper.props[camelized] = convertAttributeValue(
-      value,
-      key,
-      camelizedPropsMap[camelized]
-    );
+
+    // we don't want an undefined json suffix to override the normal prop value (if any)
+    if (!jsonSuffixed || value) {
+      el._wrapper.props[camelized] = convertAttributeValue(
+        value,
+        key,
+        camelizedPropsMap[camelized]
+      );
+    }
   }
 
   class CustomElement extends HTMLElement {

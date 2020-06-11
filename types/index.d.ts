@@ -1,16 +1,19 @@
 import _Vue, { Component, AsyncComponent } from 'vue'
 
 interface WrapOptions {
-  target?: HTMLElement,
-  selector?: string,
-  filter?(el: HTMLElement): Boolean,
-  observeOptions?: Object
+  globalStyles?: {
+    target?: HTMLElement,
+    selector?: string,
+    filter?(el: HTMLElement): Boolean,
+    observeOptions?: Object
+  },
+  jsonMapping?: Boolean
 }
 
 declare function wrap(
   Vue: typeof _Vue,
   Component: Component | AsyncComponent,
-  wrapOptions: Boolean | WrapOptions
+  wrapOptions?: WrapOptions
 ): HTMLElement
 
 export default wrap
