@@ -1,20 +1,12 @@
 {
-  "plugins": [
-    [
-      "transform-builtin-classes",
-      {
-        "globals": ["HTMLElement"],
-        "logIfPatched": true
-      }
-    ]
-  ],
+  "plugins": [["@babel/plugin-transform-classes"]],
   "presets": [
     [
       "@babel/preset-env",
       {
         "modules": false,
         "targets": {
-          "browsers": ["> 1%", "last 2 versions", "not ie <= 10"]
+          "browsers": ["> 1%", "last 2 versions", "not ie <= 10", "ie 11"]
         }
       }
     ]

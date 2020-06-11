@@ -30,20 +30,21 @@
   },
   "homepage": "https://github.com/TeliaSweden/vue-web-component-wrapper-ie11#readme",
   "devDependencies": {
-    "eslint": "^4.16.0",
-    "eslint-plugin-vue-libs": "^2.1.0",
-    "http-server": "^0.11.1",
-    "jest": "^22.1.4",
-    "lint-staged": "^6.1.0",
-    "puppeteer": "^1.0.0",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/polyfill": "^7.10.1",
+    "@babel/plugin-transform-classes": "^7.10.1",
+    "eslint": "^7.2.0",
+    "eslint-plugin-vue-libs": "^4.0.0",
+    "http-server": "^0.12.3",
+    "jest": "^26.0.1",
+    "lint-staged": "^10.2.9",
+    "puppeteer": "^3.3.0",
     "rollup": "^0.55.3",
-    "babel-plugin-transform-builtin-classes": "^0.6.1",
-    "@babel/preset-env": "7.9.5",
-    "@babel/core": "7.9.0",
     "rollup-plugin-babel": "^4.4.0",
-    "typescript": "^3.2.2",
-    "vue": "^2.5.13",
-    "yorkie": "^1.0.3"
+    "typescript": "^3.9.5",
+    "vue": "^2.6.11",
+    "yorkie": "^2.0.0"
   },
   "eslintConfig": {
     "env": {

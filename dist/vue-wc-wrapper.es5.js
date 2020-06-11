@@ -1,19 +1,3 @@
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
     var info = gen[key](arg);
@@ -188,11 +172,13 @@ function _possibleConstructorReturn(self, call) {
 }
 
 function _createSuper(Derived) {
-  return function () {
+  var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+  return function _createSuperInternal() {
     var Super = _getPrototypeOf(Derived),
         result;
 
-    if (_isNativeReflectConstruct()) {
+    if (hasNativeReflectConstruct) {
       var NewTarget = _getPrototypeOf(this).constructor;
 
       result = Reflect.construct(Super, arguments, NewTarget);
@@ -313,30 +299,6 @@ function getAttributes(node) {
   return res;
 }
 
-var _fixBabelExtend = function (O) {
-  var gPO = O.getPrototypeOf || function (o) {
-    return o.__proto__;
-  },
-      sPO = O.setPrototypeOf || function (o, p) {
-    o.__proto__ = p;
-    return o;
-  },
-      construct = (typeof Reflect === "undefined" ? "undefined" : _typeof(Reflect)) === 'object' ? Reflect.construct : function (Parent, args, Class) {
-    var Constructor,
-        a = [null];
-    a.push.apply(a, args);
-    Constructor = Parent.bind.apply(Parent, a);
-    return sPO(new Constructor(), Class.prototype);
-  };
-
-  return function fixBabelExtend(Class) {
-    var Parent = gPO(Class);
-    return sPO(Class, sPO(function Super() {
-      return construct(Parent, arguments, gPO(this).constructor);
-    }, Parent));
-  };
-}(Object);
-
 function wrap(Vue, Component) {
   var isAsync = typeof Component === 'function' && !Component.cid;
   var isInitialized = false;
@@ -402,7 +364,7 @@ function wrap(Vue, Component) {
     el._wrapper.props[camelized] = convertAttributeValue(value, key, camelizedPropsMap[camelized]);
   }
 
-  var CustomElement = _fixBabelExtend( /*#__PURE__*/function (_HTMLElement) {
+  var CustomElement = /*#__PURE__*/function (_HTMLElement) {
     _inherits(CustomElement, _HTMLElement);
 
     var _super = _createSuper(CustomElement);
@@ -640,7 +602,7 @@ function wrap(Vue, Component) {
     }]);
 
     return CustomElement;
-  }( /*#__PURE__*/_wrapNativeSuper(HTMLElement)));
+  }( /*#__PURE__*/_wrapNativeSuper(HTMLElement));
 
   if (!isAsync) {
     initialize(Component);
