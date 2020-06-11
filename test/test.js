@@ -1,3 +1,5 @@
+/* globals test expect el, els */
+
 const launchPage = require('./setup')
 
 test('properties', async () => {
@@ -16,9 +18,9 @@ test('properties', async () => {
     el.foo = 234
     el.someProp = 'lol'
   })
-  const newFoo = await page.evaluate(()  => el.vueComponent.foo)
+  const newFoo = await page.evaluate(() => el.vueComponent.foo)
   expect(newFoo).toBe(234)
-  const newBar = await page.evaluate(()  => el.vueComponent.someProp)
+  const newBar = await page.evaluate(() => el.vueComponent.someProp)
   expect(newBar).toBe('lol')
 })
 
@@ -98,12 +100,16 @@ test('async', async () => {
   const { page } = await launchPage(`async`)
 
   // should not be ready yet
-  expect(await page.evaluate(() => els[0].shadowRoot.querySelector('div'))).toBe(null)
-  expect(await page.evaluate(() => els[1].shadowRoot.querySelector('div'))).toBe(null)
+  expect(
+    await page.evaluate(() => els[0].shadowRoot.querySelector('div'))
+  ).toBe(null)
+  expect(
+    await page.evaluate(() => els[1].shadowRoot.querySelector('div'))
+  ).toBe(null)
 
   // wait until component is resolved
-  await new Promise(resolve => {
-    page.on('console', msg => {
+  await new Promise((resolve) => {
+    page.on('console', (msg) => {
       if (msg.text() === 'resolved') {
         resolve()
       }
@@ -111,14 +117,20 @@ test('async', async () => {
   })
 
   // both instances should be initialized
-  expect(await page.evaluate(() => els[0].shadowRoot.textContent)).toMatch(`123 bar`)
-  expect(await page.evaluate(() => els[1].shadowRoot.textContent)).toMatch(`234 baz`)
+  expect(await page.evaluate(() => els[0].shadowRoot.textContent)).toMatch(
+    `123 bar`
+  )
+  expect(await page.evaluate(() => els[1].shadowRoot.textContent)).toMatch(
+    `234 baz`
+  )
 
   // attribute sync should work
   await page.evaluate(() => {
     els[0].setAttribute('foo', '345')
   })
-  expect(await page.evaluate(() => els[0].shadowRoot.textContent)).toMatch(`345 bar`)
+  expect(await page.evaluate(() => els[0].shadowRoot.textContent)).toMatch(
+    `345 bar`
+  )
 
   // new instance should work
   await page.evaluate(() => {
@@ -126,7 +138,9 @@ test('async', async () => {
     newEl.setAttribute('foo', '456')
     document.body.appendChild(newEl)
   })
-  expect(await page.evaluate(() => {
-    return document.querySelectorAll('my-element')[2].shadowRoot.textContent
-  })).toMatch(`456 bar`)
+  expect(
+    await page.evaluate(() => {
+      return document.querySelectorAll('my-element')[2].shadowRoot.textContent
+    })
+  ).toMatch(`456 bar`)
 })

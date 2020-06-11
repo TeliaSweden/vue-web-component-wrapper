@@ -1,3 +1,5 @@
+/* globals beforeAll afterAll */
+require('@babel/polyfill')
 const puppeteer = require('puppeteer')
 const { createServer } = require('http-server')
 
@@ -8,11 +10,21 @@ const puppeteerOptions = process.env.CI
 
 let browser, server
 
-module.exports = async function launchPage (name) {
+module.exports = async function launchPage(name) {
+  // const browser = await puppeteer.launch();
+  // const page = await browser.newPage();
+  // await page.goto(url);
+  // await page.screenshot({path: 'example.png'});
+
+  // await browser.close();
+
+  const browser = await puppeteer.launch()
+
   const url = `http://localhost:${port}/test/fixtures/${name}.html`
   const page = await browser.newPage()
+  await page.goto(url)
   const logs = []
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     logs.push(msg.text())
   })
   await page.goto(url)
@@ -23,7 +35,7 @@ beforeAll(async () => {
   browser = await puppeteer.launch(puppeteerOptions)
   server = createServer({ root: process.cwd() })
   await new Promise((resolve, reject) => {
-    server.listen(port, err => {
+    server.listen(port, (err) => {
       if (err) return reject(err)
       resolve()
     })

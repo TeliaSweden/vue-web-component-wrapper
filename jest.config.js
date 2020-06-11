@@ -1,3 +1,1 @@
-module.exports = {
-  setupFiles: ['<rootDir>/jest.init.js']
-}
+module.exports = {}
