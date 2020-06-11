@@ -22,7 +22,7 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
   if (wrapOptions.globalStyles) {
     const defaults = {
       target: document.head,
-      selector: 'style, link',
+      selector: 'style, link[rel="stylesheet"], link[rel="preload"][as="style"]',
       filter: undefined,
       observeOptions: { childList: true, subtree: true }
     }
