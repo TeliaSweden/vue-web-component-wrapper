@@ -22,7 +22,8 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
   if (wrapOptions.globalStyles) {
     const defaults = {
       target: document.head,
-      selector: 'style, link[rel="stylesheet"], link[rel="preload"][as="style"]',
+      selector:
+        'style, link[rel="stylesheet"], link[rel="preload"][as="style"]',
       filter: undefined,
       observeOptions: { childList: true, subtree: true }
     }
@@ -283,26 +284,28 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
         const tempContainer = document.createElement('div')
         this.shadowRoot.appendChild(tempContainer)
 
-        // all initial styles
-        cloneElementsToShadowRoot(
-          this.shadowRoot,
-          getAllStyles(
+        if (wrapOptions.globalStyles) {
+          // all initial styles
+          cloneElementsToShadowRoot(
+            this.shadowRoot,
+            getAllStyles(
+              wrapOptions.globalStyles.target,
+              wrapOptions.globalStyles.selector,
+              wrapOptions.globalStyles.filter
+            )
+          )
+
+          // all added styles
+          observeStyleChanges(
+            (elements) => {
+              cloneElementsToShadowRoot(this.shadowRoot, elements)
+            },
             wrapOptions.globalStyles.target,
             wrapOptions.globalStyles.selector,
-            wrapOptions.globalStyles.filter
+            wrapOptions.globalStyles.filter,
+            wrapOptions.globalStyles.observeOptions
           )
-        )
-
-        // all added styles
-        observeStyleChanges(
-          (elements) => {
-            cloneElementsToShadowRoot(this.shadowRoot, elements)
-          },
-          wrapOptions.globalStyles.target,
-          wrapOptions.globalStyles.selector,
-          wrapOptions.globalStyles.filter,
-          wrapOptions.globalStyles.observeOptions
-        )
+        }
 
         // tempContainer will be completely rewritten
         wrapper.$mount(tempContainer)
