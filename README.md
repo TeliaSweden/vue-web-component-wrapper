@@ -7,7 +7,7 @@ This is a fork of [@vue/web-component-wrapper](https://github.com/vuejs/vue-web-
 
 * **extends support to IE11** through babel transpilation with the [babel-plugin-transform-builtin-classes](https://github.com/WebReflection/babel-plugin-transform-builtin-classes) plugin that was created to address the issue of extending `HTMLElement` in browsers without native support for ES2015 classes.
    - It also fixes support for ShadyDOM usage regarding slots where slots are not caught by a Mutation Observer (issue: https://github.com/webcomponents/polyfills/issues/81)
-* If enabled, does continous auto-injection of global styles to inside the shadow dom
+* If enabled, does continous auto-injection of global styles and link elements to inside the shadow dom
 * If enabled, lets you pass stringified props to "-json" suffixed attributes, which will automatically deserialize to the source component that you're exporting as a web component.
 
 If you're running into this [issue](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#npm-run-build-fails-to-minify) -- i.e. "Failed to minify the code from this file" -- trying to minify code from the original project, this fork may also help you out, as all the code is transpiled to ES5.
@@ -69,6 +69,7 @@ const CustomElement = wrap(Vue, () => import(`MyComponent.vue`), {
 window.customElements.define('my-element', CustomElement)
 ```
 
+You can specify more granular rules for global style injection, refer to the source code for details. The defaults should be reasonable for most developers.
 
 If you want automatic deserialization of javascript objects and arrays, enable like this
 ```js
@@ -80,8 +81,6 @@ window.customElements.define('my-element', CustomElement)
 ```
 
 Then just pass "my-array-json" like `:my-array-json="JSON.stringify({ a: 1 })"` to your web component, it will parse it to the prop called "myArray" in the vue file as a regular js object again. If the json is invalid it will become "INVALID_JSON". This works for props defined with type `Array` and `Object`
-
-You can specify more granular rules for global style injection, refer to the source code for details. The defaults should be reasonable for most developers.
 
 ## Interface Proxying Details
 
