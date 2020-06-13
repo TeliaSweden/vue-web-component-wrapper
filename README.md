@@ -55,7 +55,7 @@ Easiest is to do:
 import "@webcomponents/webcomponentsjs";
 ```
 
-The polyfill bundle with check if the browser supports web components and will apply polyfills as needed. If you want to reduce bundle size even further, that is possible, just consult the [@webcomponents/webcomponentsjs documentation](https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs).
+The polyfill bundle with check if the browser supports web components and will apply polyfills as needed. If you want to reduce bundle size even further, that is possible, just consult the [@webcomponents/webcomponentsjs documentation on using their loader](https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs).
 
 Whatever you do, do not import the custom elements and other polyfills directly, as it will overwrite native browser functionality for browsers like Chrome, that already  support Web Components.
 
