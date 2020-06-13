@@ -6,7 +6,7 @@
 ### From the original project: [@vue/web-component-wrapper](https://github.com/vuejs/vue-web-component-wrapper):
 - Automatically emits Custom Events from `this.$emit()` calls
 - Supports passing in slots
-- Isolated styles, thanks to Shadow DOM (has limitations with leaking styles in IE 11, see further down)
+- Isolated styles, thanks to Shadow DOM (has limitations with leaking styles in IE 11, [see this section](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/master/README.md#ie11-warning-note-on-css-encapsulation-when-using-the-shady-dom-polyfill))
 - Very simple to use.
 
 ### From this fork
