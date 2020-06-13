@@ -1,84 +1,107 @@
 # @telia/vue-web-component-wrapper-ie11
-> Wrap and register a Vue component as a custom element, in IE 11 and beyond.
+> Wrap and register a Vue component as a custom element (with Shadow DOM), in IE 11 and beyond.
 
-## Compatibility
+## Features
 
-This is a fork of [@vue/web-component-wrapper](https://github.com/vuejs/vue-web-component-wrapper) which
+### From the original project: [@vue/web-component-wrapper](https://github.com/vuejs/vue-web-component-wrapper):
+- Automatically emits Custom Events from `this.$emit()` calls
+- Supports passing in slots
+- Isolated styles, thanks to Shadow DOM (has limitations with leaking styles in IE 11, see further down)
+- Very simple to use.
 
-* **extends support to IE11** through babel transpilation with the [babel-plugin-transform-builtin-classes](https://github.com/WebReflection/babel-plugin-transform-builtin-classes) plugin that was created to address the issue of extending `HTMLElement` in browsers without native support for ES2015 classes.
-   - It also fixes support for ShadyDOM usage regarding slots where slots are not caught by a Mutation Observer (issue: https://github.com/webcomponents/polyfills/issues/81)
-* If enabled, does continous auto-injection of global styles and link elements to inside the shadow dom
-* If enabled, lets you pass stringified props to "-json" suffixed attributes, which will automatically deserialize to the source component that you're exporting as a web component.
+### From this fork
+- _Best-effort_ IE 11 support thanks to ES5 transpilation, as well as [a work-around to fix a bug in ShadyDOM regarding Mutation Observers](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/bd385d5641688c83ff32ed26bd4d4268ca197a07/src/index.js#L171). Just make sure to include the polyfill described in the next section.
+- If enabled, offers auto-injection of global styles. Can be configured to be selective, too.
+- If enabled, exposes "-json" suffixed props based on your source component props, that automatically map JSON to Objects/Arrays back to your source props.
 
-If you're running into this [issue](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#npm-run-build-fails-to-minify) -- i.e. "Failed to minify the code from this file" -- trying to minify code from the original project, this fork may also help you out, as all the code is transpiled to ES5.
-
-**Requires IE11 or higher, from the plugin [docs](https://github.com/WebReflection/babel-plugin-transform-builtin-classes)**:
-> This transformer works on IE11 and every other browser with Object.setPrototypeOf or \_\_proto\_\_ as fallback.
-
-> There is NO IE <= 10 support. If you need IE <= 10 don't use this plugin and/or don't extend natives (recommended).
-
-Other notes:
-
-- **If targeting browsers that don't support native Web Components:**
-
-  You will also need the [Shady DOM + Custom Elements polyfill](https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs).
-
-  See caniuse.com for support on [Custom Elements v1](https://caniuse.com/#feat=custom-elementsv1) and [Shadow DOM v1](https://caniuse.com/#feat=shadowdomv1).
-
-- **Note on CSS Encapsulation When Using the Shady DOM polyfill**
-
-  It's recommended to use [CSS Modules](https://vue-loader.vuejs.org/en/features/css-modules.html) instead of `<style scoped>` in your `*.vue` files if you intend to use the Shady DOM polyfill, because it does not offer real style encapsulation like Shadow DOM does, so external stylesheets may affect your components if not using hashed class names.
 
 ## Usage
 
-- **`dist/vue-wc-wrapper.js`**: This file is in ES modules format. It's the default export for bundlers, and can be used in browsers with `<script type="module">`.
-
-- **`dist/vue-wc-wrapper.global.js`**: This is for old school `<script>` includes in browsers that do not support `<script type="module">` yet (exposes `wrapVueWebComponent` global).
-
-- **`dist/vue-wc-wrapper.es5.js`**: This file is in ES5 format which works in IE 11.
-
-- **`dist/vue-wc-wrapper.es5.global.js`**: This file is in ES5 format which works in IE 11. Exposes `wrapVueWebComponent` global.
-
 ``` js
+import "@webcomponents/webcomponentsjs";
+
 import Vue from 'vue'
-import wrap from '@vue/web-component-wrapper'
+import wrap from '@telia/vue-web-component-wrapper-ie11';
+import VueComponent from './VueComponent.vue';
 
-const Component = {
-  // any component options
-}
+const CustomElement = wrap(Vue, VueComponent, {
+    // globalStyles: true,
+    // jsonMapping: true,
+});
 
-const CustomElement = wrap(Vue, Component)
-
-window.customElements.define('my-element', CustomElement)
+window.customElements.define(
+    'vue-component',
+    CustomElement,
+);
 ```
+
+Now you can just add `<vue-component>` anywhere in the page, and the component will appear fully loaded, like it was made by the browser itself. This seamless step is arguably the best part of utilizing Web Components.
 
 It works with async components as well - you can pass an async component factory function that returns a Promise, and the function will only be called when an instance of the custom element is created on the page:
 
 ``` js
-const CustomElement = wrap(Vue, () => import(`MyComponent.vue`))
+const CustomElement = wrap(Vue, () => import(`VueComponent.vue`))
 
 window.customElements.define('my-element', CustomElement)
 ```
 
-If you want auto-injection of the global styles, enable it like this:
+You can also import or just have a <script> tag point to `@telia/vue-web-component-wrapper-ie11/dist/vue-wc-wrapper.global.js`, which will expose `wrap` as `wrapVueWebComponent` globally on the window object.
+
+## Polyfilling for IE 11
+
+Easiest is to do:
+
 ```js
-const CustomElement = wrap(Vue, () => import(`MyComponent.vue`), {
-  globalStyles: true,
-})
-
-window.customElements.define('my-element', CustomElement)
+import "@webcomponents/webcomponentsjs";
 ```
 
-You can specify more granular rules for global style injection, refer to the source code for details. The defaults should be reasonable for most developers.
+The polyfill bundle with check if the browser supports web components and will apply polyfills as needed. If you want to reduce bundle size even further, that is possible, just consult the [@webcomponents/webcomponentsjs documentation](https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs).
 
-If you want automatic deserialization of javascript objects and arrays, enable like this
-```js
-const CustomElement = wrap(Vue, () => import(`MyComponent.vue`), {
-  jsonMapping: true,
-})
+Whatever you do, do not import the custom elements and other polyfills directly, as it will overwrite native browser functionality for browsers like Chrome, that already  support Web Components.
 
-window.customElements.define('my-element', CustomElement)
-```
+### IE11 Warning: Note on CSS Encapsulation When Using the Shady DOM polyfill
+
+The styles will leak through to your web components in IE 11 in several cases, like when passing slots to the web component. Make sure you use a way to encapsulate your styles like BEM, Scoped styles (has drawbacks of its own), or CSS Modules. Choose the one that fits you.
+
+## API
+
+Note that glob patterns can only contain forward-slashes, not backward-slashes, so if you want to construct a glob pattern from path components, you need to use `path.posix.join()` instead of `path.join()`.
+
+### wrap(VueInstance, sourceComponent, wrapOptions?)
+
+Returns a Custom Element, that can be used in the browser-provided `window.customElements.define` call.
+
+#### VueInstance
+
+Type: `object`
+
+Your Vue instance.
+
+#### sourceComponent
+
+Type: `object`
+
+Your source component (can also just be a simple javascript object `{}`, not a separate vue file).
+
+#### wrapOptions?
+
+Type: `object`
+
+##### globalStyles?
+
+Type: `boolean | object`\
+Default: `false`
+
+If you want auto-injection of the global styles, set it to `true`.
+
+You can specify more granular rules for global style injection, refer to [this part of the source code](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/bd385d5641688c83ff32ed26bd4d4268ca197a07/src/index.js#L23) for details. The defaults should be reasonable for most developers.
+
+##### jsonMapping?
+
+Type: `boolean`\
+Default: `false`
+
+If you want automatic deserialization of javascript objects and arrays.
 
 Then just pass "my-array-json" like `:my-array-json="JSON.stringify({ a: 1 })"` to your web component, it will parse it to the prop called "myArray" in the vue file as a regular js object again. If the json is invalid it will become "INVALID_JSON". This works for props defined with type `Array` and `Object`
 
