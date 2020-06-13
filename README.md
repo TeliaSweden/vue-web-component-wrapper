@@ -65,8 +65,6 @@ The styles will leak through to your web components in IE 11 in several cases, l
 
 ## API
 
-Note that glob patterns can only contain forward-slashes, not backward-slashes, so if you want to construct a glob pattern from path components, you need to use `path.posix.join()` instead of `path.join()`.
-
 ### wrap(VueInstance, sourceComponent, wrapOptions?)
 
 Returns a Custom Element, that can be used in the browser-provided `window.customElements.define` call.
