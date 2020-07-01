@@ -168,7 +168,8 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
         }
       }))
 
-      if (window.ShadyDOM) {
+      // options can be passed to ShadyDOM in window, so check for a relevant polyfill method as well.
+      if (window.ShadyDOM && window.ShadyDOM.observeChildren) {
         // MutationObserver does not work inside shadowRoot when polyfilled with ShadyDOM
         // this makes slot changes go unrecognized by our usage of MutationObserver
         // https://github.com/webcomponents/polyfills/issues/81
