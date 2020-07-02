@@ -140,14 +140,94 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
   }
 
   class CustomElement extends HTMLElement {
-    constructor() {
-      const self = super()
-      self.attachShadow({ mode: 'open' })
+    initShadyDOMCompatability() {
+      // MutationObserver does not work inside shadowRoot when polyfilled with ShadyDOM
+      // this makes slot changes go unrecognized by our usage of MutationObserver
+      // https://github.com/webcomponents/polyfills/issues/81
 
-      const wrapper = (self._wrapper = new Vue({
+      // ShadyDOM has a function called ShadyDOM.childrenObserver but it doesn't do the job very thoroughly, as it
+      // cannot recognize changes in slots when the slot count hasn't changed, and seemingly doesn't recognized removal of elements (https://github.com/webcomponents/polyfills/issues/82)
+      // .. what it can do for us however, is to observe whether slots are ever added.
+      // once a slot is added, we'll apply the hack to this wrapper.
+      // if slots are never used, we're saving ourselves some performance cost.
+      window.ShadyDOM.observeChildren(this, () => {
+        if (!this._wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper) {
+          this._wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper = true
+        }
+      })
+
+      // Here is the ugly fix to work around the core issue, basically setInterval, but shared across all vue wc wrappers for performance
+      // we preserve the original MutationObserver code further down, because it observes all other changes for us.
+      window.ShadyDOMSlotsHack_setInterval =
+        window.ShadyDOMSlotsHack_setInterval ||
+        // eslint-disable-next-line no-extra-parens
+        new (function () {
+          this.listeners = []
+
+          this.add = (handler) => {
+            const id = Math.floor(Math.random() * 1000000)
+            this.listeners.push({
+              handler,
+              id
+            })
+
+            if (this.listeners.length === 1) {
+              // first entry added, start setInterval
+              this.start()
+            }
+            return id
+          }
+
+          this.remove = (idToRemove) => {
+            this.listeners.splice(
+              this.listeners.findIndex(({ id }) => id === idToRemove),
+              1
+            )
+
+            if (this.listeners.length === 0) {
+              // no entries left, stop setInterval
+              this.stop()
+            }
+          }
+
+          this.start = () => {
+            if (this.intervalId === undefined || this.intervalId === null) {
+              this.intervalId = window.setInterval(() => {
+                this.listeners.forEach(({ handler }) => handler())
+              }, 100)
+            }
+          }
+
+          this.stop = () => {
+            if (this.intervalId) {
+              window.clearInterval(this.intervalId)
+              this.intervalId = null
+            }
+          }
+        })()
+
+      const id = window.ShadyDOMSlotsHack_setInterval.add(() => {
+        if (this._wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper) {
+          // slots were added to the wrapper at some point, so update children at every interval
+          this.updateSlotChildren()
+        }
+      })
+
+      this._wrapper.ShadyDOMSlotsHack_deregisterSetIntervalListener = () =>
+        window.ShadyDOMSlotsHack_setInterval.remove(id)
+    }
+
+    init() {
+      const self = this
+
+      if (!this.shadowRoot) {
+        this.attachShadow({ mode: 'open' })
+      }
+
+      this._wrapper = self._wrapper = new Vue({
         name: 'shadow-root',
         customElement: self,
-        shadowRoot: self.shadowRoot,
+        shadowRoot: this.shadowRoot,
         data() {
           return {
             props: {},
@@ -166,84 +246,11 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
             this.slotChildren
           )
         }
-      }))
+      })
 
       // options can be passed to ShadyDOM in window, so check for a relevant polyfill method as well.
       if (window.ShadyDOM && window.ShadyDOM.observeChildren) {
-        // MutationObserver does not work inside shadowRoot when polyfilled with ShadyDOM
-        // this makes slot changes go unrecognized by our usage of MutationObserver
-        // https://github.com/webcomponents/polyfills/issues/81
-
-        // ShadyDOM has a function called ShadyDOM.childrenObserver but it doesn't do the job very thoroughly, as it
-        // cannot recognize changes in slots when the slot count hasn't changed, and seemingly doesn't recognized removal of elements (https://github.com/webcomponents/polyfills/issues/82)
-        // .. what it can do for us however, is to observe whether slots are ever added.
-        // once a slot is added, we'll apply the hack to this wrapper.
-        // if slots are never used, we're saving ourselves some performance cost.
-        window.ShadyDOM.observeChildren(this, () => {
-          if (!wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper) {
-            wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper = true
-          }
-        })
-
-        // Here is the ugly fix to work around the core issue, basically setInterval, but shared across all vue wc wrappers for performance
-        // we preserve the original MutationObserver code further down, because it observes all other changes for us.
-        window.ShadyDOMSlotsHack_setInterval =
-          window.ShadyDOMSlotsHack_setInterval ||
-          // eslint-disable-next-line no-extra-parens
-          new (function () {
-            this.listeners = []
-
-            this.add = (handler) => {
-              const id = Math.floor(Math.random() * 1000000)
-              this.listeners.push({
-                handler,
-                id
-              })
-
-              if (this.listeners.length === 1) {
-                // first entry added, start setInterval
-                this.start()
-              }
-              return id
-            }
-
-            this.remove = (idToRemove) => {
-              this.listeners.splice(
-                this.listeners.findIndex(({ id }) => id === idToRemove),
-                1
-              )
-
-              if (this.listeners.length === 0) {
-                // no entries left, stop setInterval
-                this.stop()
-              }
-            }
-
-            this.start = () => {
-              if (this.intervalId === undefined || this.intervalId === null) {
-                this.intervalId = window.setInterval(() => {
-                  this.listeners.forEach(({ handler }) => handler())
-                }, 100)
-              }
-            }
-
-            this.stop = () => {
-              if (this.intervalId) {
-                window.clearInterval(this.intervalId)
-                this.intervalId = null
-              }
-            }
-          })()
-
-        const id = window.ShadyDOMSlotsHack_setInterval.add(() => {
-          if (wrapper.ShadyDOMSlotsHack_slotsPassedToWrapper) {
-            // slots were added to the wrapper at some point, so update children at every interval
-            this.updateSlotChildren()
-          }
-        })
-
-        wrapper.ShadyDOMSlotsHack_deregisterSetIntervalListener = () =>
-          window.ShadyDOMSlotsHack_setInterval.remove(id)
+        this.initShadyDOMCompatability()
       }
 
       // Use MutationObserver to react to future attribute & slot content change
@@ -285,18 +292,21 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
     }
 
     async connectedCallback() {
-      const wrapper = this._wrapper
-
       // TODO: Vue's router will be instantiated immediately, before the router
       // in `mover-app` has finished transitioning URLs, making the Vue router
       // resolve the wrong URL. Wait one micro-task to allow `mover-app`'s
       // router to finish transitioning.
       await Promise.resolve()
 
-      if (!wrapper._isMounted) {
+      if (!this.initDone) {
+        this.initDone = true
+        this.init()
+      }
+
+      if (!this._wrapper._isMounted) {
         // initialize attributes
         const syncInitialAttributes = () => {
-          wrapper.props = getInitialProps(camelizedPropsList)
+          this._wrapper.props = getInitialProps(camelizedPropsList)
           hyphenatedPropsList.forEach((key) => {
             syncAttribute(this, key)
           })
@@ -351,7 +361,7 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
         }
 
         // tempContainer will be completely rewritten
-        wrapper.$mount(tempContainer)
+        this._wrapper.$mount(tempContainer)
       } else {
         callHooks(this.vueComponent, 'activated')
       }
