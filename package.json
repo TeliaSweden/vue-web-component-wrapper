@@ -4,6 +4,7 @@
   "description": "wrap a vue component as a web component, for IE 11 too.",
   "main": "dist/vue-wc-wrapper.umd.js",
   "module": "dist/esm/index.js",
+  "browser": "dist/vue-wc-wrapper.umd.js",
   "unpkg": "dist/vue-wc-wrapper.global.js",
   "typings": "types/index.d.ts",
   "files": [
