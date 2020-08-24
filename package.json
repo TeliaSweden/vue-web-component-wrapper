@@ -1,6 +1,6 @@
 {
   "name": "@telia/vue-web-component-wrapper-ie11",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "wrap a vue component as a web component, for IE 11 too.",
   "main": "dist/vue-wc-wrapper.umd.js",
   "module": "dist/esm/index.js",
