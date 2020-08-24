@@ -15,6 +15,7 @@
     "test": "jest",
     "lint": "eslint src",
     "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
     "prepublishOnly": "rollup -c",
     "test:types": "tsc -p ./types/tsconfig.json"
   },
