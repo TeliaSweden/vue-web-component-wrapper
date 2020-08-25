@@ -7,6 +7,10 @@ function wrap(Vue, Component, wrapOptions = {}) {
   let camelizedPropsList;
   let camelizedPropsMap;
 
+  if (wrapOptions.supportScopedCss === undefined) {
+    wrapOptions.supportScopedCss = true;
+  }
+
   if (wrapOptions.globalStyles) {
     const defaults = {
       target: document.head,
@@ -320,14 +324,7 @@ function wrap(Vue, Component, wrapOptions = {}) {
         // initialize children
         this.updateSlotChildren();
 
-        // doing this will let us access the shadow root via `this.$root.$el.getRootNode()`
-        // inside of the mounted hook, which is important for copying global styles to the shadow dom.
-        // const tempContainer = document.createElement('div')
-        // this.shadowRoot.appendChild(tempContainer)
-
-        // tempContainer will be completely rewritten
         this._wrapper.$mount();
-        // this._wrapper.$el.style.display = 'none'
 
         if (wrapOptions.globalStyles) {
           // all initial styles
@@ -352,8 +349,12 @@ function wrap(Vue, Component, wrapOptions = {}) {
           );
         }
 
-        // vue scoped styles need a micro-task to apply stylings
-        setTimeout(() => this.shadowRoot.appendChild(this._wrapper.$el));
+        if (wrapOptions.supportScopedCss) {
+          // vue scoped styles need a micro-task to apply stylings
+          setTimeout(() => this.shadowRoot.appendChild(this._wrapper.$el));
+        } else {
+          this.shadowRoot.appendChild(this._wrapper.$el);
+        }
       } else {
         callHooks(this.vueComponent, 'activated');
       }

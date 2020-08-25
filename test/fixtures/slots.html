@@ -6,7 +6,7 @@ customElements.define('my-element', wrap(Vue, {
   template: `
     <div><slot/><slot name="foo"/></div>
   `,
-}))
+}, { supportScopedCss: false }))
 
 window.el = document.querySelector('my-element')
 </script>

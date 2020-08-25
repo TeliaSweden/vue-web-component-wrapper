@@ -1,63 +1,73 @@
 # @telia/vue-web-component-wrapper-ie11
+
 > Wrap and register a Vue component as a custom element (with Shadow DOM), in IE 11 and beyond.
 
 ## Features
 
 ### From the original project: [@vue/web-component-wrapper](https://github.com/vuejs/vue-web-component-wrapper):
+
 - Automatically emits Custom Events from `this.$emit()` calls
 - Supports passing in slots
 - Isolated styles, thanks to Shadow DOM (has limitations with leaking styles in IE 11, [see this section](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/master/README.md#ie11-warning-note-on-css-encapsulation-when-using-the-shady-dom-polyfill))
 - Very simple to use.
 
 ### From this fork
-- _Best-effort_ IE 11 support thanks to ES5 transpilation, as well as [a work-around to fix a bug in ShadyDOM regarding Mutation Observers](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/bd385d5641688c83ff32ed26bd4d4268ca197a07/src/index.js#L171). Just make sure to include the polyfill described in the next section.
+
+- _Best-effort_ IE 11 support thanks to ES5 transpilation, [a work-around to fix a bug in ShadyDOM regarding Mutation Observers](https://github.com/TeliaSweden/vue-web-component-wrapper-ie11/blob/bd385d5641688c83ff32ed26bd4d4268ca197a07/src/index.js#L171), and a few other fixes specifically written for IE 11 support. Just make sure to include the polyfill described in the next section.
 - If enabled, offers auto-injection of global styles. Can be configured to be selective, too.
 - If enabled, exposes "-json" suffixed props based on your source component props, that automatically map JSON to Objects/Arrays back to your source props.
-
+- Better support for Vue's scoped style tags without FOUC's.
 
 ## Usage
 
-``` js
-import "@webcomponents/webcomponentsjs";
+```js
+import '@webcomponents/webcomponentsjs'
 
 import Vue from 'vue'
-import wrap from '@telia/vue-web-component-wrapper-ie11';
-import VueComponent from './VueComponent.vue';
+import wrap from '@telia/vue-web-component-wrapper-ie11'
+import VueComponent from './VueComponent.vue'
 
 const CustomElement = wrap(Vue, VueComponent, {
-    // globalStyles: true,
-    // jsonMapping: true,
-});
+  // globalStyles: true,
+  // jsonMapping: true,
+})
 
-window.customElements.define(
-    'vue-component',
-    CustomElement,
-);
+window.customElements.define('vue-component', CustomElement)
 ```
 
 Now you can just add `<vue-component>` anywhere in the page, and the component will appear fully loaded, like it was made by the browser itself. This seamless step is arguably the best part of utilizing Web Components.
 
 It works with async components as well - you can pass an async component factory function that returns a Promise, and the function will only be called when an instance of the custom element is created on the page:
 
-``` js
+```js
 const CustomElement = wrap(Vue, () => import(`VueComponent.vue`))
 
 window.customElements.define('my-element', CustomElement)
 ```
 
-You can also import or just have a <script> tag point to `@telia/vue-web-component-wrapper-ie11/dist/vue-wc-wrapper.global.js`, which will expose `wrap` as `wrapVueWebComponent` globally on the window object.
+You can also import or just have a `<script>` tag point to `@telia/vue-web-component-wrapper-ie11/dist/vue-wc-wrapper.global.js`, which will expose `wrap` as `wrapVueWebComponent` globally on the window object.
+
+## How do I use this instead of the standard library shipped with Vue-CLI?
+
+- Change from `--target wc` to `--target lib` (or anything else really) in the Vue-CLI run options (probably in package.json)
+  - Add `--inline-vue` if you want to make sure Vue is included in your web component.
+- Make sure you have a main.js file.
+- Import and use the `wrap()` method as shown above
+- You can also export the bare Vue component also via ES6 exports, should you need to.
+
+Note that with the above approach, you'll be putting all web components in a single bundle. This section does not document how to make a bundle per web component.
 
 ## Polyfilling for IE 11
 
 Easiest is to do:
 
 ```js
-import "@webcomponents/webcomponentsjs";
+import '@webcomponents/webcomponentsjs'
 ```
 
 The polyfill bundle with check if the browser supports web components and will apply polyfills as needed. If you want to reduce bundle size even further, that is possible, just consult the [@webcomponents/webcomponentsjs documentation on using their loader](https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs).
 
-Whatever you do, do not import the custom elements and other polyfills directly, as it will overwrite native browser functionality for browsers like Chrome, that already  support Web Components.
+Whatever you do, do not import the custom elements and other polyfills directly, as it will overwrite native browser functionality for browsers like Chrome, that already support Web Components.
 
 ### IE11 Warning: Note on CSS Encapsulation When Using the Shady DOM polyfill
 
@@ -84,6 +94,13 @@ Your source component (can also just be a simple javascript object `{}`, not a s
 #### wrapOptions?
 
 Type: `object`
+
+##### supportScopedCss?
+
+Type: `boolean`\
+Default: `true`
+
+Setting this to false will skip a 0ms setTimeout() call, but will also break Vue's scoped attribute support in the form of FOUC's.
 
 ##### globalStyles?
 
@@ -139,7 +156,7 @@ When the custom element is removed from the document, the Vue component behaves 
 
 If you wish to destroy the inner component, you'd have to do that explicitly:
 
-``` js
+```js
 myElement.vueComponent.$destroy()
 ```
 

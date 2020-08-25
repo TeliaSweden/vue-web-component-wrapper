@@ -23,7 +23,10 @@ const Component = () => new Promise(resolve => {
   }, 100)
 })
 
-customElements.define('my-element', wrap(Vue, Component))
+customElements.define(
+  'my-element',
+  wrap(Vue, Component, { supportScopedCss: false })
+)
 
 window.els = document.querySelectorAll('my-element')
 </script>
