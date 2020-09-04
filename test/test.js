@@ -23,6 +23,39 @@ test('properties', async () => {
   expect(newBar).toBe('lol')
 })
 
+test('nested attribute-changes', async () => {
+  const { page } = await launchPage(`nested`)
+
+  // boolean
+  const foo = await page.evaluate(() => el.foo)
+  expect(foo).toBe(true)
+
+  // boolean="true"
+  const bar = await page.evaluate(() => el.bar)
+  expect(bar).toBe(true)
+
+  // some-number="123"
+  const someNumber = await page.evaluate(() => el.someNumber)
+  expect(someNumber).toBe(123)
+
+  // set via attribute
+  await page.evaluate(() => {
+    el.setAttribute('foo', 'foo')
+    el.setAttribute('bar', 'false')
+    el.setAttribute('some-number', '234')
+  })
+
+  // boolean="boolean"
+  expect(await page.evaluate(() => el.foo)).toBe(true)
+  expect(await page.evaluate(() => el.bar)).toBe(false)
+  expect(await page.evaluate(() => el.someNumber)).toBe(234)
+
+  // ensure attribute changes actually populate to the shadow DOM contents
+  expect(await page.evaluate(() => el.shadowRoot.firstElementChild.outerHTML)).toBe(
+    '<div>true false 234</div>'
+  )
+})
+
 test('attributes', async () => {
   const { page } = await launchPage(`attributes`)
 
