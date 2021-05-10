@@ -128,7 +128,7 @@ export default function wrap(Vue, Component, wrapOptions = {}) {
   }
 
   function syncAttribute(el, key) {
-    const jsonSuffixed = key.endsWith('-json')
+    const jsonSuffixed = key.indexOf('-json', this.length - '-json'.length) !== -1
     const camelized = camelize(key.replace(/-json$/, ''))
 
     const value = el.hasAttribute(key) ? el.getAttribute(key) : undefined
